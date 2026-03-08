@@ -4,9 +4,9 @@ This improved README aligns your current code with the specific grading and func
 
 ---
 
-# 🍴 Restaurant Multi-language Ordering System
+# 🍽️ Restaurant Multi-language Ordering System
 
-An interactive GUI-based ordering system developed in Python. This project fulfills the requirements for the **COMP0001/COMP2016** course, focusing on a user-friendly interface, automated discount logic, and dynamic content management.
+An interactive GUI-based ordering system developed in Python. This project fulfills the requirements for the **COMP2090SEF** course, focusing on a user-friendly interface, automated discount logic, and dynamic content management.
 
 ## 📋 Project Requirements Checklist
 
@@ -33,13 +33,12 @@ Based on the official project specifications, this application implements:
 
 
 
-## 🚀 Key Features
+## ⭐ Key Features
 
 ### 1. Intelligent Time-Based Filtering
 
 The system automatically detects the current **Hong Kong Time (HKT)** and presents the appropriate menu:
 | Period | Menu Type | Logic |
-| :--- | :--- | :--- |
 | **06:00 - 11:00** | Breakfast | Standard morning offerings. |
 | **11:00 - 14:00** | Lunch | Mid-day specials. |
 | **14:00 - 18:00** | Afternoon Tea | Includes a mix of Tea and Lunch menus. |
