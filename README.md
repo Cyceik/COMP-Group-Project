@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/25821881/README.md)
 # 🍽️ Restaurant Multi-language Ordering System
 
 An interactive GUI-based ordering system developed in Python. This project fulfills the requirements for the **COMP2090SEF** course, focusing on a user-friendly interface, automated discount logic, and dynamic content management.
