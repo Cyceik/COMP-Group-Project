@@ -33,10 +33,12 @@ Based on the official project specifications, this application implements:
 
 The system automatically detects the current **Hong Kong Time (HKT)** and presents the appropriate menu:
 | Period | Menu Type | Logic |
+| :--- | :--- | :--- |
 | **06:00 - 11:00** | Breakfast | Standard morning offerings. |
 | **11:00 - 14:00** | Lunch | Mid-day specials. |
 | **14:00 - 18:00** | Afternoon Tea | Includes a mix of Tea and Lunch menus. |
 | **18:00 - 22:00** | Dinner | Evening menu. |
+
 
 ### 2. Discount & Promotion Engine
 
