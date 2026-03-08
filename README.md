@@ -1,9 +1,3 @@
-# COMP-Group-Project
-For the COMP2090SEF Group Project 
-This improved README aligns your current code with the specific grading and functional requirements outlined in the **Course Project Guidelines**. It highlights the technical implementation of the required features, such as the discount logic and time-based menu filtering.
-
----
-
 # 🍽️ Restaurant Multi-language Ordering System
 
 An interactive GUI-based ordering system developed in Python. This project fulfills the requirements for the **COMP2090SEF** course, focusing on a user-friendly interface, automated discount logic, and dynamic content management.
