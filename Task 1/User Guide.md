@@ -82,11 +82,3 @@ Apply discounts in the **Cart** tab using these codes:
 Access the management backend by clicking the **"Admin"** button. 
 * **Password**: `admin123`
 * **Capabilities**: View real-time sales statistics, top 10 popular items, and update order statuses (Pending, Preparing, Ready, Completed).
-
----
-
-## Technical Implementation Details
-
-For developers interested in the architecture:
-* **Data Structure**: Uses **Hash Sets** for $O(1)$ favorite lookups and **DataFrames** for initial Excel parsing.
-* **Algorithm**: Employs **Regular Expression (Regex)** pattern matching for phone number validation (`r'^\d{8}$'`) and **Greedy Logic** for coupon calculations and top-item sorting.
