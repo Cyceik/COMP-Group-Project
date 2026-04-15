@@ -1,40 +1,92 @@
-This guide is meant to walk you through the process of installing and using the Restaurant Ordering System
+# Restaurant Ordering System
 
-1. Prerequisites
-Make sure that you have Python 3 installed. In addition, you will have to download the following third party packages using the terminal or the command line interface:
-pandas: To read the menu data from Excel.
-openpyxl: Package that is required by pandas for parsing `.xlsx` files.
-pytz: To handle the time zones used in the menu timer in Hong Kong.
+This guide is designed to walk you through the process of installing and using the **Restaurant Ordering System**, a Python-based GUI application for managing restaurant orders with real-time menu updates and administrative tracking.
 
-2. Files Preparation
-These files are required by the application in order to work properly:
-Script File: Make sure you save the Python code file as `Latest..py`.
-Excel Database: The menu database should be stored in the form of an Excel file called `menu_data.xlsx` in `W:\comp gp project\menu_data.xlsx`. 
-Note: The path should be updated in case the Excel file is stored at a different location. Look for Line 318 in the script.
+---
 
+## 1. Prerequisites
 
-3. Program Launching
-Open your terminal or IDE (such as VS Code or PyCharm).
-Change directory into where you saved `Latest..py`.
-Use this command to launch the application:
+Before running the application, ensure you have **Python 3** installed. You will also need to install several third-party libraries used for data handling and time zone management.
 
+Open your terminal or command prompt and run:
 
-4. Initial Setup Steps
-After launching the app, there are three required screens you need to complete:
+```bash
+pip install pandas openpyxl pytz
+```
 
-1.Language selection window. Pick between the following options: Traditional Chinese (繁體中文), Simplified Chinese (简体中文), or English.
-2.Student status selection window. Choose either "Yes" or "No" option. If the option "Yes" is picked, a 10% discount is applied on relevant items.
+* **pandas**: Used to read and process menu data from Excel.
+* **openpyxl**: Required by pandas for parsing `.xlsx` files.
+* **pytz**: Handles Hong Kong time zones for the dynamic menu timer.
 
-3.Order type window. Pick whether you would like to dine "In restaurant" or make "Take Away" order.（If you select Dine In, you must enter a Table Number before confirming.）
+---
 
+## 2. Files Preparation
 
-5. App Features
-Time-Based Menu: The menu changes according to the time in Hong Kong (e.g. Breakfast menu is shown from 06:00-10:59, and lunch menu appears at 11:00-13:59).
- 
-Search & Filtering: Use the search bar or choose from category icons (such as Main Course, Appetizer, etc.) to filter out items from the list.
+To ensure the application works properly, prepare the following files:
 
-Favorites Feature: Press the star icon near each item in order to save your favorite
-dishes, and access them by pressing the "★ Favorites" button.
-Coupon Codes: Enter the following coupon codes in the "Cart" tab: `WELCOME10` $10 off; `STUDENT20` - $20 off.
+* **Script File**: Save the Python code as `Latest..py`.
+* **Excel Database**: The system expects a file named `menu_data.xlsx` located at:
+    `W:\comp gp project\menu_data.xlsx`
+    
+> [!IMPORTANT]
+> If your Excel file is stored in a different location, you **must** update the file path. Open `Latest..py`, go to **Line 318**, and change the path string to match your local directory.
 
-Admin Panel: Press the "Admin" button and provide the password `admin123` in order to access sales statistics information.
+---
+
+## 3. Program Launching
+
+1.  Open your terminal or a preferred IDE (such as **VS Code** or **PyCharm**).
+2.  Navigate (Change Directory) to the folder where you saved `Latest..py`.
+3.  Run the application using the following command:
+
+```bash
+python "Latest..py"
+```
+
+---
+
+## 4. Initial Setup Steps
+
+Upon launching the app, you must complete three configuration screens:
+
+1.  **Language Selection**: Choose between **Traditional Chinese (繁體中文)**, **Simplified Chinese (简体中文)**, or **English**.
+2.  **Student Status**: Choose **Yes** or **No**. Selecting "Yes" applies an automatic **10% discount** to eligible items.
+3.  **Order Type**: Select **Dine In** or **Take Away**. 
+    * *Note: If you select **Dine In**, you will be prompted to enter a **Table Number** before proceeding.*
+
+---
+
+## 5. App Features
+
+### 🕒 Time-Based Menu
+The menu automatically synchronizes with Hong Kong local time. The available items change dynamically:
+* **Breakfast**: 06:00 – 10:59
+* **Lunch**: 11:00 – 13:59
+* *And so on for Afternoon Tea and Dinner.*
+
+### 🔍 Search & Filtering
+* **Search Bar**: Type keywords to find specific dishes.
+* **Category Icons**: Quickly filter items by categories like *Main Course*, *Appetizer*, *Beverage*, etc.
+
+### ⭐ Favorites Feature
+* Click the **star icon** next to any dish to save it to your personal favorites.
+* Toggle the **"★ Favorites"** button to filter the menu and show only your saved items.
+
+### 🎫 Coupon Codes
+Apply discounts in the **Cart** tab using these codes:
+* `WELCOME10`: $10 fixed discount.
+* `STUDENT20`: $20 fixed discount.
+* `SAVE15`: 15% off your total.
+
+### 🔐 Admin Panel
+Access the management backend by clicking the **"Admin"** button. 
+* **Password**: `admin123`
+* **Capabilities**: View real-time sales statistics, top 10 popular items, and update order statuses (Pending, Preparing, Ready, Completed).
+
+---
+
+## Technical Implementation Details
+
+For developers interested in the architecture:
+* **Data Structure**: Uses **Hash Sets** for $O(1)$ favorite lookups and **DataFrames** for initial Excel parsing.
+* **Algorithm**: Employs **Regular Expression (Regex)** pattern matching for phone number validation (`r'^\d{8}$'`) and **Greedy Logic** for coupon calculations and top-item sorting.
