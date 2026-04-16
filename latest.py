@@ -1,4 +1,3 @@
-# pip3 install pandas openpyxl pytz
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import pandas as pd
@@ -6,9 +5,6 @@ import datetime
 import re
 import pytz
 
-# ============================================================
-# 全局變量 Global Variables
-# ============================================================
 text = {}
 is_student = False
 menu = []
@@ -20,15 +16,13 @@ secondary_menu_type = ""
 current_language = "en"
 free_beverage_map = {}
 
-# ── 新增全局變量 ──────────────────────────────────────────────
-favorites       = set()       # 收藏商品 ID 集合
-order_type      = "dine_in"   # dine_in | takeaway
+favorites       = set()
+order_type      = "dine_in"
 table_number    = ""
 coupon_discount = 0
 current_coupon  = ""
 search_query    = ""
 
-# 優惠碼 {code: (type, value)}  type: "fixed"=$折扣 | "percent"=%折扣
 COUPONS = {
     "WELCOME10": ("fixed",   10),
     "STUDENT20": ("fixed",   20),
@@ -45,18 +39,15 @@ STATUS_COLORS = {
 }
 
 
-# ============================================================
 class RestaurantApp:
-# ============================================================
     def __init__(self, master):
         self.master = master
         self.master.configure(bg="#f0f0f0")
         self.master.resizable(True, True)
 
-        # 初始化步驟
         self.select_language()
         self.select_student_status()
-        self.select_order_type()           # 新增：堂食/外帶
+        self.select_order_type()
 
         if not self.create_menu():
             messagebox.showerror("Error", "Failed to load menu data")
@@ -66,12 +57,10 @@ class RestaurantApp:
         self.update_current_menu()
         self.create_widgets()
         self.update_menu_display()
-        self.update_clock()                # 新增：即時時鐘
+        self.update_clock()
 
-    # ──────────────────────────────────────────────────────────
-    # 語言選擇
-    # ──────────────────────────────────────────────────────────
     def select_language(self):
+        """顯示語言選擇視窗，讓用戶選擇繁體中文、簡體中文或英文介面。"""
         global text, current_language
 
         win = tk.Toplevel(self.master)
@@ -105,17 +94,15 @@ class RestaurantApp:
         self.master.wait_window(win)
 
     def center_window(self, window):
+        """將指定視窗置中顯示於螢幕中央。"""
         window.update_idletasks()
         w, h = window.winfo_width(), window.winfo_height()
         x = (window.winfo_screenwidth()  // 2) - (w // 2)
         y = (window.winfo_screenheight() // 2) - (h // 2)
         window.geometry(f'{w}x{h}+{x}+{y}')
 
-    # ──────────────────────────────────────────────────────────
-    # 語言文本
-    # ──────────────────────────────────────────────────────────
     def _common_keys(self):
-        """所有語言共用的新增鍵，子方法按語言覆蓋"""
+        """返回所有語言共用的新增鍵值對字典。"""
         return {
             "dine_in": "Dine In", "takeaway": "Takeaway",
             "order_type": "Order Type",
@@ -147,6 +134,7 @@ class RestaurantApp:
         }
 
     def load_traditional_chinese(self):
+        """載入繁體中文語言文本字典，設定全局 text 變量。"""
         global text
         text = {
             "welcome": "歡迎光臨餐廳點餐系統",
@@ -187,7 +175,6 @@ class RestaurantApp:
             "select": "確定", "cancel": "取消",
             "free_item": "免費", "confirm": "確認",
             "free_with_main": "與主餐贈送",
-            # 新增鍵
             "dine_in": "堂食", "takeaway": "外帶",
             "order_type": "用餐方式",
             "order_type_question": "請選擇用餐方式",
@@ -216,6 +203,7 @@ class RestaurantApp:
         }
 
     def load_simplified_chinese(self):
+        """載入簡體中文語言文本字典，設定全局 text 變量。"""
         global text
         text = {
             "welcome": "欢迎光临餐厅点餐系统",
@@ -256,7 +244,6 @@ class RestaurantApp:
             "select": "确定", "cancel": "取消",
             "free_item": "免费", "confirm": "确认",
             "free_with_main": "与主餐赠送",
-            # 新增键
             "dine_in": "堂食", "takeaway": "外带",
             "order_type": "用餐方式",
             "order_type_question": "请选择用餐方式",
@@ -285,6 +272,7 @@ class RestaurantApp:
         }
 
     def load_english(self):
+        """載入英文語言文本字典，設定全局 text 變量。"""
         global text
         text = {
             "welcome": "Welcome to Restaurant Ordering System",
@@ -327,7 +315,6 @@ class RestaurantApp:
             "select": "Select", "cancel": "Cancel",
             "free_item": "Free", "confirm": "Confirm",
             "free_with_main": "Free w/ main",
-            # New keys
             "dine_in": "Dine In", "takeaway": "Takeaway",
             "order_type": "Order Type",
             "order_type_question": "Select Order Type",
@@ -357,10 +344,8 @@ class RestaurantApp:
             "no_ice": "No Ice", "hot": "Hot",
         }
 
-    # ──────────────────────────────────────────────────────────
-    # 學生狀態
-    # ──────────────────────────────────────────────────────────
     def select_student_status(self):
+        """顯示學生身份確認視窗，詢問用戶是否為學生以決定是否享有折扣。"""
         global is_student
 
         win = tk.Toplevel(self.master)
@@ -387,14 +372,13 @@ class RestaurantApp:
         self.master.wait_window(win)
 
     def set_student_status(self, status, window):
+        """設定全局學生身份狀態並關閉確認視窗。"""
         global is_student
         is_student = status
         window.destroy()
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：堂食 / 外帶選擇
-    # ──────────────────────────────────────────────────────────
     def select_order_type(self):
+        """顯示用餐方式選擇視窗，讓用戶選擇堂食（需輸入桌號）或外帶。"""
         global order_type, table_number
 
         win = tk.Toplevel(self.master)
@@ -426,7 +410,6 @@ class RestaurantApp:
                              command=lambda: _select("takeaway"))
         take_btn.grid(row=0, column=1, padx=15)
 
-        # 桌號輸入區（預設顯示）
         table_frame = tk.Frame(win)
         table_var = tk.StringVar()
         tk.Label(table_frame,
@@ -469,10 +452,8 @@ class RestaurantApp:
         self.center_window(win)
         self.master.wait_window(win)
 
-    # ──────────────────────────────────────────────────────────
-    # 菜單數據
-    # ──────────────────────────────────────────────────────────
     def create_menu(self):
+        """從 menu_data.xlsx 讀取菜單資料，將所有行儲存至全局 menu 列表中。"""
         global menu
         try:
             df = pd.read_excel("menu_data.xlsx")
@@ -484,26 +465,30 @@ class RestaurantApp:
             return False
 
     def update_current_menu(self):
+        """根據香港當前時間判斷應顯示的菜單時段，並更新全局菜單類型變量。"""
         global current_menu_type, secondary_menu_type
         h = self.get_hk_time().hour
-        if   6 <= h < 11: current_menu_type, secondary_menu_type = "breakfast",    ""
-        elif 11 <= h < 14: current_menu_type, secondary_menu_type = "lunch",        ""
-        elif 14 <= h < 18: current_menu_type, secondary_menu_type = "afternoon_tea","lunch"
-        elif 18 <= h < 22: current_menu_type, secondary_menu_type = "dinner",       ""
-        else:              current_menu_type, secondary_menu_type = "dinner",       ""
+        if   6 <= h < 11: current_menu_type, secondary_menu_type = "breakfast",     ""
+        elif 11 <= h < 14: current_menu_type, secondary_menu_type = "lunch",         ""
+        elif 14 <= h < 18: current_menu_type, secondary_menu_type = "afternoon_tea", "lunch"
+        elif 18 <= h < 22: current_menu_type, secondary_menu_type = "dinner",        ""
+        else:              current_menu_type, secondary_menu_type = "dinner",        ""
 
     def get_hk_time(self):
+        """返回香港時區（Asia/Hong_Kong）的當前時間。"""
         return datetime.datetime.now(pytz.timezone('Asia/Hong_Kong'))
 
     def get_current_menu_name(self):
+        """根據當前菜單類型返回對應的本地化菜單名稱字串。"""
         return {
-            "breakfast":    text.get("breakfast_menu",    "Breakfast Menu"),
-            "lunch":        text.get("lunch_menu",        "Lunch Menu"),
-            "afternoon_tea":text.get("afternoon_tea_menu","Afternoon Tea Menu"),
-            "dinner":       text.get("dinner_menu",       "Dinner Menu"),
+            "breakfast":     text.get("breakfast_menu",     "Breakfast Menu"),
+            "lunch":         text.get("lunch_menu",         "Lunch Menu"),
+            "afternoon_tea": text.get("afternoon_tea_menu", "Afternoon Tea Menu"),
+            "dinner":        text.get("dinner_menu",        "Dinner Menu"),
         }.get(current_menu_type, "")
 
     def get_category_name(self, item_type):
+        """將商品類別代碼轉換為對應語言的顯示名稱。"""
         return {
             "main_course": text.get("main_course", "Main Course"),
             "side_dish":   text.get("side_dish",   "Side Dish"),
@@ -514,17 +499,17 @@ class RestaurantApp:
         }.get(item_type, item_type)
 
     def get_item_name(self, item):
+        """根據當前語言設定，返回商品的對應語言名稱。"""
         if current_language == "tc": return item[1]
         if current_language == "sc": return item[2]
         return item[3]
 
     def get_price(self, original_price):
+        """根據用戶是否為學生計算並返回最終價格（學生享9折優惠）。"""
         return round(original_price * 0.9) if is_student else original_price
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：菜單時段計時器
-    # ──────────────────────────────────────────────────────────
     def get_menu_period_info(self):
+        """返回當前菜單時段的名稱及結束小時，若在休息時段則返回 closed 及下次開放小時。"""
         h = self.get_hk_time().hour
         for start, end, name_key in [
             (6,  11, "breakfast"),
@@ -537,6 +522,7 @@ class RestaurantApp:
         return text.get("closed", "Closed"), 6
 
     def get_time_remaining(self):
+        """計算並返回當前菜單時段的剩餘時間，格式為 HH:MM。"""
         now = self.get_hk_time()
         h   = now.hour
         if   6  <= h < 11: end_h = 11
@@ -553,11 +539,8 @@ class RestaurantApp:
         diff = int((end - now).total_seconds())
         return f"{diff // 3600:02d}:{(diff % 3600) // 60:02d}"
 
-    # ──────────────────────────────────────────────────────────
-    # 主界面佈局
-    # ──────────────────────────────────────────────────────────
     def create_widgets(self):
-        # ── 頂部深色欄 ────────────────────────────────────────
+        """建立主介面所有 UI 元件，包括頂部資訊欄、分頁標籤及各分頁容器。"""
         top = tk.Frame(self.master, bg="#2c3e50", pady=8)
         top.pack(fill="x")
 
@@ -573,11 +556,11 @@ class RestaurantApp:
         tk.Label(left, text=f"{text.get('order_type','Type')}: {ot_str}",
                  bg="#2c3e50", fg="#bdc3c7", font=("Arial", 10)).pack(anchor="w")
 
-        s_status = text.get("student","Student") if is_student else text.get("non_student","Non-student")
+        s_status = text.get("student", "Student") if is_student else text.get("non_student", "Non-student")
         tk.Label(left, text=f"{text.get('student_status','Status')}: {s_status}",
                  bg="#2c3e50", fg="#bdc3c7", font=("Arial", 10)).pack(anchor="w")
         if is_student:
-            tk.Label(left, text=text.get("student_discount","10% off"),
+            tk.Label(left, text=text.get("student_discount", "10% off"),
                      bg="#2c3e50", fg="#f39c12", font=("Arial", 10, "italic")).pack(anchor="w")
 
         right = tk.Frame(top, bg="#2c3e50")
@@ -601,11 +584,10 @@ class RestaurantApp:
                   bg="#7f8c8d", fg="white", font=("Arial", 10),
                   relief="flat", padx=8, pady=2).pack(anchor="e", pady=(4, 0))
 
-        # ── Notebook ─────────────────────────────────────────
         self.tab_control = ttk.Notebook(self.master)
-        self.menu_tab   = ttk.Frame(self.tab_control)
-        self.cart_tab   = ttk.Frame(self.tab_control)
-        self.orders_tab = ttk.Frame(self.tab_control)
+        self.menu_tab    = ttk.Frame(self.tab_control)
+        self.cart_tab    = ttk.Frame(self.tab_control)
+        self.orders_tab  = ttk.Frame(self.tab_control)
 
         self.tab_control.add(self.menu_tab,   text=f"  {text.get('view_menu','Menu')}  ")
         self.tab_control.add(self.cart_tab,   text=f"  {text.get('view_cart','Cart')} (0)  ")
@@ -616,10 +598,8 @@ class RestaurantApp:
         self.setup_cart_tab()
         self.setup_orders_tab()
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：即時時鐘更新
-    # ──────────────────────────────────────────────────────────
     def update_clock(self):
+        """每秒更新頂部欄的即時時鐘及菜單時段剩餘時間顯示。"""
         now = self.get_hk_time()
         self.clock_label.config(text=now.strftime('%Y-%m-%d  %H:%M:%S'))
         period_name, _ = self.get_menu_period_info()
@@ -627,11 +607,8 @@ class RestaurantApp:
             text=f"⏱  {period_name}  |  {text.get('time_remaining','Left')}: {self.get_time_remaining()}")
         self.master.after(1000, self.update_clock)
 
-    # ──────────────────────────────────────────────────────────
-    # 菜單 Tab
-    # ──────────────────────────────────────────────────────────
     def setup_menu_tab(self):
-        # 標題列
+        """建立菜單分頁的所有 UI 元件，包括標題、收藏篩選按鈕、搜尋欄、分類篩選列及可滾動菜單區。"""
         hdr = tk.Frame(self.menu_tab, bg="#ecf0f1", pady=6)
         hdr.pack(fill="x")
 
@@ -639,7 +616,6 @@ class RestaurantApp:
                                         font=("Arial", 14, "bold"), bg="#ecf0f1")
         self.menu_type_label.pack(side="left", padx=15)
 
-        # 新增：收藏篩選按鈕
         self.show_fav = False
         self.fav_btn  = tk.Button(hdr,
                                   text=text.get("show_favorites", "★ Favorites"),
@@ -648,7 +624,6 @@ class RestaurantApp:
                                   font=("Arial", 10), relief="flat", padx=10, pady=3)
         self.fav_btn.pack(side="right", padx=10)
 
-        # 新增：搜尋欄
         search_bar = tk.Frame(self.menu_tab, bg="#f5f5f5", pady=5)
         search_bar.pack(fill="x", padx=10)
 
@@ -667,7 +642,6 @@ class RestaurantApp:
         self.search_entry.bind("<FocusIn>",  lambda e: self._clear_ph())
         self.search_entry.bind("<FocusOut>", lambda e: self._restore_ph())
 
-        # 新增：分類篩選按鈕列
         cat_bar = tk.Frame(self.menu_tab, bg="#f5f5f5", pady=4)
         cat_bar.pack(fill="x", padx=10)
 
@@ -688,7 +662,6 @@ class RestaurantApp:
             btn.pack(side="left", padx=3)
             self.cat_buttons[cat_key] = btn
 
-        # 可滾動菜單區
         area = tk.Frame(self.menu_tab)
         area.pack(fill="both", expand=True)
 
@@ -705,18 +678,20 @@ class RestaurantApp:
         canvas.bind("<MouseWheel>",
                     lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
-    # 搜尋 placeholder 輔助
     def _clear_ph(self):
+        """當搜尋欄獲得焦點時，清除佔位符文字。"""
         if self.search_entry.get() == text.get("search", "Search menu..."):
             self.search_var.set("")
             self.search_entry.config(fg="black")
 
     def _restore_ph(self):
+        """當搜尋欄失去焦點且為空時，恢復顯示佔位符文字。"""
         if not self.search_entry.get():
             self.search_entry.insert(0, text.get("search", "Search menu..."))
             self.search_entry.config(fg="grey")
 
     def on_search_change(self, *args):
+        """當搜尋欄內容變更時，更新全局搜尋關鍵字並重新渲染菜單。"""
         global search_query
         query = self.search_var.get()
         search_query = "" if query == text.get("search", "Search menu...") else query.lower()
@@ -724,6 +699,7 @@ class RestaurantApp:
             self.update_menu_display()
 
     def toggle_favorites_filter(self):
+        """切換收藏篩選模式，開啟時只顯示已收藏的商品。"""
         self.show_fav = not self.show_fav
         if self.show_fav:
             self.fav_btn.config(bg="#e74c3c",
@@ -734,15 +710,14 @@ class RestaurantApp:
         self.update_menu_display()
 
     def set_category_filter(self, category):
+        """設定當前分類篩選條件，並更新按鈕高亮及菜單顯示。"""
         self.cat_filter = category
         for k, btn in self.cat_buttons.items():
             btn.config(bg="#3498db" if k == category else "#bdc3c7")
         self.update_menu_display()
 
-    # ──────────────────────────────────────────────────────────
-    # 購物車 Tab
-    # ──────────────────────────────────────────────────────────
     def setup_cart_tab(self):
+        """建立購物車分頁的所有 UI 元件，包括商品列表、優惠碼輸入列、金額顯示及結帳表單。"""
         cart_area = tk.Frame(self.cart_tab)
         cart_area.pack(fill="both", expand=True, padx=10, pady=5)
 
@@ -762,11 +737,9 @@ class RestaurantApp:
         canvas.bind("<MouseWheel>",
                     lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
-        # 底部：優惠碼 + 合計 + 結帳表單
         bottom = tk.Frame(self.cart_tab, bg="#f9f9f9", pady=8)
         bottom.pack(fill="x", side="bottom")
 
-        # 優惠碼列
         coupon_row = tk.Frame(bottom, bg="#f9f9f9")
         coupon_row.pack(fill="x", padx=15, pady=3)
 
@@ -781,7 +754,6 @@ class RestaurantApp:
                                    font=("Arial", 10), fg="#27ae60")
         self.coupon_msg.pack(side="left", padx=8)
 
-        # 金額列
         price_row = tk.Frame(bottom, bg="#f9f9f9")
         price_row.pack(fill="x", padx=15, pady=2)
 
@@ -799,7 +771,6 @@ class RestaurantApp:
                                     bg="#f9f9f9", font=("Arial", 14, "bold"))
         self.total_label.pack(anchor="e")
 
-        # 結帳表單
         form = tk.Frame(bottom, bg="#f9f9f9")
         form.pack(fill="x", padx=15, pady=5)
 
@@ -818,10 +789,8 @@ class RestaurantApp:
                   font=("Arial", 13, "bold"), relief="flat",
                   padx=30, pady=10).grid(row=2, column=0, columnspan=3, pady=12)
 
-    # ──────────────────────────────────────────────────────────
-    # 訂單 Tab
-    # ──────────────────────────────────────────────────────────
     def setup_orders_tab(self):
+        """建立訂單歷史分頁的 UI 元件，包括標題及可滾動訂單記錄列表。"""
         hdr = tk.Frame(self.orders_tab, bg="#ecf0f1", pady=6)
         hdr.pack(fill="x")
         tk.Label(hdr, text=text.get("order_history", "Order History"),
@@ -843,10 +812,8 @@ class RestaurantApp:
         canvas.bind("<MouseWheel>",
                     lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
-    # ──────────────────────────────────────────────────────────
-    # 菜單顯示
-    # ──────────────────────────────────────────────────────────
     def update_menu_display(self):
+        """清空並重新渲染菜單分頁，根據當前時段顯示對應菜單，下午茶時段同時顯示午餐菜單。"""
         for w in self.scrollable_menu.winfo_children():
             w.destroy()
 
@@ -870,6 +837,7 @@ class RestaurantApp:
             self.display_menu_section(current_items)
 
     def display_menu_section(self, menu_items):
+        """將指定菜單項目列表渲染為商品卡片，支援分類標題、收藏篩選、搜尋篩選及數量控制。"""
         current_cat = ""
         count = 0
 
@@ -892,11 +860,9 @@ class RestaurantApp:
                           font=("Arial", 11, "bold")).pack(
                     anchor="w", padx=10, pady=(12, 4))
 
-            # 商品卡片
             card = tk.Frame(self.scrollable_menu, bg="#ffffff", relief="groove", bd=1)
             card.pack(fill="x", padx=12, pady=3, ipady=4)
 
-            # 左側：資訊
             info = tk.Frame(card, bg="#ffffff")
             info.pack(side="left", fill="x", expand=True, padx=10)
 
@@ -907,14 +873,12 @@ class RestaurantApp:
             name_row = tk.Frame(info, bg="#ffffff")
             name_row.pack(anchor="w", fill="x")
 
-            # 商品名稱（可點擊查看詳情）
             name_lbl = tk.Label(name_row, text=f"{item[0]}. {name}",
                                 font=("Arial", 12, "bold"),
                                 bg="#ffffff", cursor="hand2")
             name_lbl.pack(side="left")
             name_lbl.bind("<Button-1>", lambda e, i=item: self.show_item_detail(i))
 
-            # 收藏按鈕
             is_fav = item[0] in favorites
             tk.Button(name_row,
                       text="★" if is_fav else "☆",
@@ -924,7 +888,6 @@ class RestaurantApp:
                       command=lambda i=item: self.toggle_favorite(i)).pack(
                 side="left", padx=4)
 
-            # 價格
             if is_student:
                 tk.Label(info,
                          text=f"${orig:.0f}  →  {text.get('discount_price','Disc')}: ${price:.0f}",
@@ -933,7 +896,6 @@ class RestaurantApp:
                 tk.Label(info, text=f"${orig:.0f}",
                          font=("Arial", 11), bg="#ffffff", fg="#2c3e50").pack(anchor="w")
 
-            # 右側：數量控制 + 加入購物車
             act     = tk.Frame(card, bg="#ffffff")
             qty_var = tk.IntVar(value=1)
             act.pack(side="right", padx=10)
@@ -958,10 +920,8 @@ class RestaurantApp:
             ttk.Label(self.scrollable_menu, text="— No items found —",
                       font=("Arial", 12)).pack(pady=30)
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：商品詳情彈窗
-    # ──────────────────────────────────────────────────────────
     def show_item_detail(self, item):
+        """顯示商品詳情彈窗，包括分類、供應時段、價格（含學生折扣）及三種語言名稱。"""
         win = tk.Toplevel(self.master)
         win.title(text.get("item_detail", "Item Details"))
         win.geometry("400x360")
@@ -976,12 +936,12 @@ class RestaurantApp:
         ttk.Separator(frm, orient="horizontal").pack(fill="x", pady=10)
 
         rows = [
-            (text.get("category", "Category"),    self.get_category_name(item[9])),
-            (text.get("menu_period", "Period"),    item[8].replace("_", " ").title()),
-            (text.get("original_price","Price"),   f"${item[4]:.0f}"),
+            (text.get("category", "Category"),   self.get_category_name(item[9])),
+            (text.get("menu_period", "Period"),   item[8].replace("_", " ").title()),
+            (text.get("original_price", "Price"), f"${item[4]:.0f}"),
         ]
         if is_student:
-            rows.append((text.get("discount_price","Discounted"),
+            rows.append((text.get("discount_price", "Discounted"),
                          f"${self.get_price(item[4]):.0f}"))
         rows += [("繁體中文", item[1]), ("简体中文", item[2]), ("English", item[3])]
 
@@ -999,21 +959,16 @@ class RestaurantApp:
 
         self.center_window(win)
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：收藏切換
-    # ──────────────────────────────────────────────────────────
     def toggle_favorite(self, item):
+        """切換指定商品的收藏狀態，並重新渲染菜單以更新收藏按鈕顯示。"""
         if item[0] in favorites:
             favorites.remove(item[0])
         else:
             favorites.add(item[0])
         self.update_menu_display()
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：商品定制對話框
-    # ──────────────────────────────────────────────────────────
     def show_customization_dialog(self, item):
-        """返回 dict（確認）或 None（取消）"""
+        """顯示商品定制對話框，飲品可選甜度與冰量，食物可選辣度，所有商品可輸入備註。返回定制字典（確認）或 None（取消）。"""
         is_beverage = (item[9] == "beverage")
         is_food     = (item[9] in ["main_course", "appetizer", "combo"])
 
@@ -1039,7 +994,6 @@ class RestaurantApp:
         opts = {}
 
         if is_beverage:
-            # 甜度
             tk.Label(frm, text=text.get("sweet", "Sweetness") + ":",
                      font=("Arial", 11, "bold")).pack(anchor="w")
             sweet_var = tk.StringVar(value="full")
@@ -1053,7 +1007,6 @@ class RestaurantApp:
                                font=("Arial", 10)).pack(side="left", padx=5)
             opts["sweet"] = sweet_var
 
-            # 冰量
             tk.Label(frm, text=text.get("ice", "Ice Level") + ":",
                      font=("Arial", 11, "bold")).pack(anchor="w")
             ice_var = tk.StringVar(value="full_ice")
@@ -1068,7 +1021,6 @@ class RestaurantApp:
             opts["ice"] = ice_var
 
         if is_food:
-            # 辣度
             tk.Label(frm, text=text.get("spicy", "Spiciness") + ":",
                      font=("Arial", 11, "bold")).pack(anchor="w")
             spicy_var = tk.StringVar(value="normal")
@@ -1082,7 +1034,6 @@ class RestaurantApp:
                                font=("Arial", 10)).pack(side="left", padx=5)
             opts["spicy"] = spicy_var
 
-        # 備註
         tk.Label(frm, text=text.get("note", "Note") + ":",
                  font=("Arial", 11, "bold")).pack(anchor="w")
         note_var = tk.StringVar()
@@ -1115,10 +1066,8 @@ class RestaurantApp:
         self.master.wait_window(win)
         return result[0]
 
-    # ──────────────────────────────────────────────────────────
-    # 加入購物車
-    # ──────────────────────────────────────────────────────────
     def add_to_cart(self, item, qty_var):
+        """將指定商品加入購物車，先顯示定制對話框，若為主餐或套餐則觸發免費飲料選擇，並合併相同商品。"""
         global free_beverage_map
 
         try:
@@ -1130,10 +1079,9 @@ class RestaurantApp:
                                  text.get("quantity_error", "Quantity must be > 0"))
             return
 
-        # 定制對話框
         customization = self.show_customization_dialog(item)
         if customization is None:
-            return  # 用戶取消
+            return
 
         orig_price = item[4]
         price      = self.get_price(orig_price)
@@ -1150,7 +1098,6 @@ class RestaurantApp:
             "customization":  customization,
         }
 
-        # 合併相同商品（同定制）
         found = False
         for idx, existing in enumerate(cart):
             if (existing["id"] == item[0]
@@ -1174,12 +1121,14 @@ class RestaurantApp:
         self.update_cart_badge()
 
     def offer_free_beverage_for_quantity(self, main_idx, added_qty):
+        """當已有免費飲料對應的主餐數量增加時，同步更新免費飲料的數量。"""
         global free_beverage_map
         if main_idx in free_beverage_map:
             cart[free_beverage_map[main_idx]]["quantity"] += added_qty
             self.update_cart_display()
 
     def offer_free_beverage(self, main_item, main_idx):
+        """顯示免費飲料選擇視窗，讓用戶為已加入的主餐或套餐選擇一款免費飲料，並記錄至 free_beverage_map。"""
         beverages = [i for i in menu if i[9] == "beverage" and i[8] == main_item[8]]
         if not beverages:
             return
@@ -1253,20 +1202,16 @@ class RestaurantApp:
 
         self.center_window(win)
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：購物車 Tab 角標
-    # ──────────────────────────────────────────────────────────
     def update_cart_badge(self):
+        """更新購物車分頁標籤上的商品數量角標顯示。"""
         total_qty = sum(i["quantity"] for i in cart)
         badge = (f"  {text.get('view_cart','Cart')} ({total_qty})  "
                  if total_qty else
                  f"  {text.get('view_cart','Cart')}  ")
         self.tab_control.tab(1, text=badge)
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：優惠碼
-    # ──────────────────────────────────────────────────────────
     def apply_coupon(self):
+        """驗證並套用優惠碼，計算折扣金額並更新購物車顯示。"""
         global coupon_discount, current_coupon
         code = self.coupon_entry.get().strip().upper()
 
@@ -1288,10 +1233,8 @@ class RestaurantApp:
 
         self.update_cart_display()
 
-    # ──────────────────────────────────────────────────────────
-    # 更新購物車顯示
-    # ──────────────────────────────────────────────────────────
     def update_cart_display(self):
+        """清空並重新渲染購物車分頁，顯示所有商品（含免費飲料與定制選項）及最終金額（含優惠碼折扣）。"""
         global coupon_discount
         for w in self.scrollable_cart.winfo_children():
             w.destroy()
@@ -1338,7 +1281,6 @@ class RestaurantApp:
                              text=f"   ({text.get('original_price','Orig')}: ${orig_sub:.0f})",
                              font=("Arial", 9), bg="#ffffff", fg="#999").pack(anchor="w")
 
-            # 顯示定制選項
             custom = item.get("customization", {})
             if custom:
                 parts = [v for k, v in custom.items() if k != "note"]
@@ -1352,7 +1294,6 @@ class RestaurantApp:
                              font=("Arial", 9, "italic"), bg="#ffffff",
                              fg="#95a5a6").pack(anchor="w")
 
-            # 操作按鈕（非免費商品）
             if not item.get("is_free", False):
                 act = tk.Frame(card, bg="#ffffff")
                 act.pack(side="right", padx=5)
@@ -1363,7 +1304,6 @@ class RestaurantApp:
                            command=lambda idx=i: self.delete_item(idx),
                            width=7).pack(side="left", padx=2)
 
-        # 合計
         self.subtotal_label.config(
             text=f"{text.get('subtotal','Subtotal')}: ${subtotal:.0f}")
 
@@ -1381,10 +1321,8 @@ class RestaurantApp:
         final = max(0, subtotal - coupon_discount)
         self.total_label.config(text=f"{text.get('total','Total')}: ${final:.0f}")
 
-    # ──────────────────────────────────────────────────────────
-    # 修改數量
-    # ──────────────────────────────────────────────────────────
     def modify_quantity(self, item_index):
+        """顯示數量修改視窗，允許用戶更改購物車中指定商品的數量，並同步更新對應的免費飲料數量。"""
         global free_beverage_map
         item = cart[item_index]
 
@@ -1442,15 +1380,13 @@ class RestaurantApp:
 
         self.center_window(win)
 
-    # ──────────────────────────────────────────────────────────
-    # 刪除商品
-    # ──────────────────────────────────────────────────────────
     def delete_item(self, item_index):
+        """從購物車刪除指定商品，若為主餐則同時刪除對應的免費飲料，並重新計算 free_beverage_map 的索引。"""
         global free_beverage_map
 
         if item_index in free_beverage_map:
-            bev_idx    = free_beverage_map[item_index]
-            to_remove  = sorted([item_index, bev_idx], reverse=True)
+            bev_idx   = free_beverage_map[item_index]
+            to_remove = sorted([item_index, bev_idx], reverse=True)
             for idx in to_remove:
                 cart.pop(idx)
             del free_beverage_map[item_index]
@@ -1479,10 +1415,8 @@ class RestaurantApp:
         messagebox.showinfo(text.get("deleted", "Deleted"),
                             text.get("deleted", "Deleted"))
 
-    # ──────────────────────────────────────────────────────────
-    # 結帳
-    # ──────────────────────────────────────────────────────────
     def checkout(self):
+        """執行結帳流程：驗證姓名及8位電話號碼，計算最終金額（含優惠碼），建立訂單並清空購物車。"""
         global cart, orders, order_number, free_beverage_map
         global coupon_discount, current_coupon
 
@@ -1539,10 +1473,8 @@ class RestaurantApp:
         self.update_cart_badge()
         self.update_orders_display()
 
-    # ──────────────────────────────────────────────────────────
-    # 訂單成功視窗
-    # ──────────────────────────────────────────────────────────
     def show_order_success(self, order):
+        """顯示訂單成功彈窗，列出訂單編號、客戶資料、用餐方式、商品清單、金額明細及付款提示，並提供匯出收據功能。"""
         win = tk.Toplevel(self.master)
         win.title(text.get("order_success", "Order Success!"))
         win.geometry("620x750")
@@ -1639,7 +1571,6 @@ class RestaurantApp:
                   command=win.destroy, bg="#4CAF50", fg="white",
                   font=("Arial", 12), padx=25, pady=8).grid(row=0, column=0, padx=10)
 
-        # 新增：匯出收據按鈕
         tk.Button(bf, text=f"📄  {text.get('export_receipt','Export Receipt')}",
                   command=lambda: self.export_receipt(order),
                   bg="#3498db", fg="white",
@@ -1647,10 +1578,8 @@ class RestaurantApp:
 
         self.center_window(win)
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：匯出收據
-    # ──────────────────────────────────────────────────────────
     def export_receipt(self, order):
+        """將指定訂單的收據匯出為 .txt 文字檔案，包含訂單明細、商品定制選項及金額摘要。"""
         path = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
@@ -1707,10 +1636,8 @@ class RestaurantApp:
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-    # ──────────────────────────────────────────────────────────
-    # 更新訂單歷史顯示
-    # ──────────────────────────────────────────────────────────
     def update_orders_display(self):
+        """清空並重新渲染訂單歷史分頁，以最新訂單優先顯示，包含狀態色條、商品摘要及重新訂購按鈕。"""
         for w in self.scrollable_orders.winfo_children():
             w.destroy()
 
@@ -1733,7 +1660,6 @@ class RestaurantApp:
             content = tk.Frame(row_frm, bg="#ffffff")
             content.pack(side="left", fill="both", expand=True, padx=10)
 
-            # 標題行
             hdr_row = tk.Frame(content, bg="#ffffff")
             hdr_row.pack(fill="x")
             tk.Label(hdr_row,
@@ -1743,7 +1669,6 @@ class RestaurantApp:
                      bg=sc, fg="white", font=("Arial", 9, "bold"),
                      padx=8, pady=2).pack(side="right", padx=5)
 
-            # 時間、電話、用餐方式
             tk.Label(content,
                      text=f"⏰ {order.get('time','')}  |  📞 {order['phone']}",
                      font=("Arial", 10), bg="#ffffff", fg="#666").pack(anchor="w")
@@ -1754,7 +1679,6 @@ class RestaurantApp:
             tk.Label(content, text=ot_str, font=("Arial", 10),
                      bg="#ffffff", fg="#666").pack(anchor="w")
 
-            # 商品摘要
             non_free = [i for i in order["items"] if not i.get("is_free", False)]
             summary  = ", ".join(
                 f"{i['name']} ×{i['quantity']}" for i in non_free[:3])
@@ -1763,14 +1687,12 @@ class RestaurantApp:
             tk.Label(content, text=summary, font=("Arial", 10),
                      bg="#ffffff", fg="#555", wraplength=500).pack(anchor="w")
 
-            # 金額
             total_str = f"{text.get('order_total','Total')}: ${order['total']:.0f}"
             if order.get("coupon_code"):
                 total_str += f"  (−${order.get('coupon_discount',0):.0f} coupon)"
             tk.Label(content, text=total_str,
                      font=("Arial", 11, "bold"), bg="#ffffff").pack(anchor="w")
 
-            # 新增：重新訂購按鈕
             btn_row = tk.Frame(content, bg="#ffffff")
             btn_row.pack(fill="x")
             tk.Button(btn_row, text=f"↺  {text.get('reorder','Reorder')}",
@@ -1778,10 +1700,8 @@ class RestaurantApp:
                       bg="#3498db", fg="white", font=("Arial", 9),
                       relief="flat", padx=8, pady=2).pack(side="right", pady=3)
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：重新訂購
-    # ──────────────────────────────────────────────────────────
     def reorder(self, order):
+        """將歷史訂單中的非免費商品重新加入購物車，並切換至購物車分頁。"""
         added = 0
         for item in order["items"]:
             if item.get("is_free", False):
@@ -1810,10 +1730,8 @@ class RestaurantApp:
         else:
             messagebox.showinfo("Info", "No items could be re-added.")
 
-    # ──────────────────────────────────────────────────────────
-    # 新增：管理員面板
-    # ──────────────────────────────────────────────────────────
     def open_admin_panel(self):
+        """顯示管理員密碼輸入視窗，驗證通過後開啟管理員面板。"""
         pwd_win = tk.Toplevel(self.master)
         pwd_win.title(text.get("admin_panel", "Admin Panel"))
         pwd_win.geometry("300x185")
@@ -1854,12 +1772,13 @@ class RestaurantApp:
         self.center_window(pwd_win)
 
     def show_admin_panel(self):
+        """顯示管理員面板主視窗，包含訂單管理及銷售統計兩個分頁。"""
         win = tk.Toplevel(self.master)
         win.title(f"⚙  {text.get('admin_panel','Admin Panel')}")
         win.geometry("960x680")
         win.transient(self.master)
 
-        tc = ttk.Notebook(win)
+        tc        = ttk.Notebook(win)
         order_tab = ttk.Frame(tc)
         stats_tab = ttk.Frame(tc)
         tc.add(order_tab, text=f"  {text.get('orders','Orders')}  ")
@@ -1870,8 +1789,8 @@ class RestaurantApp:
         self._build_statistics(stats_tab)
         self.center_window(win)
 
-    # 管理員：訂單管理
     def _build_order_management(self, parent):
+        """建立管理員訂單管理介面，列出所有訂單並提供狀態更新按鈕（處理中／準備中／已備好／已完成）。"""
         hdr = tk.Frame(parent, bg="#2c3e50", pady=6)
         hdr.pack(fill="x")
         tk.Label(hdr,
@@ -1908,7 +1827,7 @@ class RestaurantApp:
                       font=("Arial", 12)).pack(pady=20)
             return
 
-        sc_map  = {s[0]: s[2] for s in STATUS_INFO}
+        sc_map = {s[0]: s[2] for s in STATUS_INFO}
 
         for real_idx, order in enumerate(reversed(orders)):
             oi     = len(orders) - 1 - real_idx
@@ -1951,15 +1870,15 @@ class RestaurantApp:
                               self._update_order_status(idx, s, l, b, c)
                               ).pack(fill="x", pady=1)
 
-    def _update_order_status(self, order_idx, status_key, status_text,
-                             badge_lbl, color):
+    def _update_order_status(self, order_idx, status_key, status_text, badge_lbl, color):
+        """更新指定訂單的狀態值及狀態標籤文字，並重新渲染訂單歷史分頁。"""
         orders[order_idx]["status"]      = status_key
         orders[order_idx]["status_text"] = status_text
         badge_lbl.config(text=status_text, bg=color)
         self.update_orders_display()
 
-    # 管理員：銷售統計
     def _build_statistics(self, parent):
+        """建立管理員銷售統計介面，顯示訂單數、總收入、學生佔比、平均訂單金額、熱門商品排行及訂單狀態分佈。"""
         hdr = tk.Frame(parent, bg="#2c3e50", pady=6)
         hdr.pack(fill="x")
         tk.Label(hdr, text=f"📊  {text.get('statistics','Statistics')}",
@@ -1978,14 +1897,13 @@ class RestaurantApp:
         stu_cnt   = sum(1 for o in orders if o["is_student"])
         avg_order = total_rev / total_cnt if total_cnt else 0
 
-        # 彩色摘要卡片
         cards = tk.Frame(frm)
         cards.pack(fill="x", pady=10)
         for title, val, col in [
-            (text.get("total_orders", "Total Orders"), total_cnt,          "#3498db"),
-            (text.get("total_revenue", "Revenue"),     f"${total_rev:.0f}","#27ae60"),
-            (text.get("student", "Students"),           stu_cnt,           "#9b59b6"),
-            ("Avg Order",                               f"${avg_order:.0f}","#e67e22"),
+            (text.get("total_orders", "Total Orders"), total_cnt,           "#3498db"),
+            (text.get("total_revenue", "Revenue"),     f"${total_rev:.0f}", "#27ae60"),
+            (text.get("student", "Students"),          stu_cnt,             "#9b59b6"),
+            ("Avg Order",                              f"${avg_order:.0f}", "#e67e22"),
         ]:
             c = tk.Frame(cards, bg=col, padx=15, pady=12)
             c.pack(side="left", fill="both", expand=True, padx=4)
@@ -1993,7 +1911,6 @@ class RestaurantApp:
             tk.Label(c, text=str(val), font=("Arial", 17, "bold"),
                      bg=col, fg="white").pack()
 
-        # 熱門商品表
         tk.Label(frm, text=f"🏆  {text.get('popular_items','Popular Items')}",
                  font=("Arial", 12, "bold")).pack(anchor="w", pady=(18, 4))
 
@@ -2028,7 +1945,6 @@ class RestaurantApp:
                          bg="#f9f9f9", anchor="w", width=w).pack(
                     side="left", padx=5, pady=3)
 
-        # 狀態分佈
         tk.Label(frm, text=f"📋  {text.get('status','Status')} Breakdown",
                  font=("Arial", 12, "bold")).pack(anchor="w", pady=(18, 4))
 
@@ -2042,7 +1958,6 @@ class RestaurantApp:
                      font=("Arial", 11)).pack(anchor="w")
 
 
-# ============================================================
 def main():
     root = tk.Tk()
     root.title("Restaurant Ordering System")
